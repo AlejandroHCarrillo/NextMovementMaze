@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output } from '@angular/core';
 import { MazeService } from '../../services/maze.service';
 
 @Component({
@@ -6,12 +6,12 @@ import { MazeService } from '../../services/maze.service';
   templateUrl: './maze-navigator.component.html',
   styleUrls: ['./maze-navigator.component.less']
 })
+
 export class MazeNavigatorComponent implements OnInit {
   moves: string[] = [];
-  availableMazes: mazeItem[] = [{name:"Preloaded maze000", isSelected : true, maze:"SOXXXXXXXX\r\nOOOXXXXXXX\r\nOXOOOXOOOO\r\nXXXXOXOXXO\r\nOOOOOOOXXO\r\nOXXOXXXXXO\r\nOOOOXXXXXE" }, 
-    {name:"Preloaded maze001", isSelected : false, maze:"S ████████\r\n   ███████\r\n █   █    \r\n████ █ ██ \r\n       ██ \r\n ██ █████ \r\n    █████E" }];
+  availableMazes: mazeItem[] = [{name:"Preloaded maze 0", isSelected : true, maze:"SOXXXXXXXX\r\nOOOXXXXXXX\r\nOXOOOXOOOO\r\nXXXXOXOXXO\r\nOOOOOOOXXO\r\nOXXOXXXXXO\r\nOOOOXXXXXE" }, 
+                                {name:"Preloaded maze 1", isSelected : false, maze:"S ████████\r\n   ███████\r\n █   █    \r\n████ █ ██ \r\n       ██ \r\n ██ █████ \r\n    █████E" }];
   selectedMaze: string[][] = [[]];
-
   titleSelectedMaze: string = "maze001";
 
   mazePosition: mazePosition = {row:1, col:0 };
@@ -22,8 +22,20 @@ export class MazeNavigatorComponent implements OnInit {
   mazeclicked :boolean = false;
 
   constructor(private mazeService: MazeService) { }
-
+    
   ngOnInit(): void {
+    // this.loadText('file:///C:/repos/maze-demo/apps/demo/src/assets/mazelibrary/maze001.txt');
+
+    console.log("cargar movimientos: ");
+    
+    this.mazeService.getMovesList()
+    .then(async (resp)=>{
+      const body = await resp.json();
+      this.moves = body;
+    })
+    .catch((e)=>{
+        console.log("error: ", e);            
+    });
 
     this.mazeService.getMazeList()
     .then(async (resp)=>{
@@ -37,17 +49,42 @@ export class MazeNavigatorComponent implements OnInit {
         console.log("error: ", e);            
     });
 
+
+    // let sMaze = this.mazeService.loadtxtFileMock(this.titleSelectedMaze);
+    // // console.log(sMaze);
+    // this.mazeSize.row= sMaze.length;      
+    // this.mazeSize.col = this.mazeSize.row;      
+
+    // sMaze.forEach(row => {
+    //   console.log(row);
+    //   let rowArray = this.stringToArray(row);
+    //   this.selectedMaze.push(rowArray);
+    //   this.mazeSize.col = rowArray.length;      
+
+    // });
   }
 
   handleFileChange(e:any){
     const file = e.target.files[0];
+    console.log(file);
+    this.mazeService.uploadMaze(file);
     if ( file ){
-      console.log(file);
-      // TODO: esto hay que quitarlo?
-      this.mazeService.uploadMaze(file);
       this.startUploading(file);
-      this.getFile(e);
+      this.getFile(e)
     }
+  }
+
+  startUploading ( file: any ) {
+    console.log("Start Uploading File: ", file);
+    
+    this.mazeService.fileUpload(file).then((fileUrl)  => {
+      console.log("La ruta del archivo es: ", fileUrl);
+    });
+  };
+  
+  stringToArray(inString:string){
+    if (inString == undefined) return;
+    return inString.split("");
   }
 
   getFile(event) {
@@ -58,6 +95,8 @@ export class MazeNavigatorComponent implements OnInit {
   }
 
   placeFileContent(file) {
+    console.log("This is the file to place content: ", file);
+    
     this.readFileContent(file).then(content => {
       console.log(content);
       let rowsContent = this.stringToRows(content);
@@ -70,7 +109,7 @@ export class MazeNavigatorComponent implements OnInit {
   }
 
   readFileContent(file) {
-    console.log(file);
+    console.log("This is the read content method: ", file);
     
     const reader = new FileReader()
     return new Promise((resolve, reject) => {
@@ -97,20 +136,63 @@ export class MazeNavigatorComponent implements OnInit {
     return mazetrix;
   }
 
-  stringToArray(inString:string){
-    if (inString == undefined) return;
-    return inString.split("");
+  selectMaze(mazeItem:mazeItem){
+    console.log("Loading Selected Maze: ", mazeItem);
+    this.availableMazes.forEach(x => x.isSelected= false);
+    mazeItem.isSelected = true;  
+    this.titleSelectedMaze = mazeItem.name;
+
+    if (mazeItem.maze == "" || mazeItem.maze == null ) {
+      let tempMaze = this.mazeService.getMazeContent(mazeItem.name);
+      tempMaze.then(r => {
+        console.log(r)
+      } );
+    }
+    this.selectedMaze = this.arrRowsToMatrix(this.stringToRows(mazeItem.maze));
+
+    this.readFileContent(mazeItem.name);
   }
 
-  startUploading ( file: any ) {
-    console.log("Start Uploading File: ", file);
+  loadText(url) {
+    console.log("loadText(url)", url);
     
-    this.mazeService.fileUpload(file).then((fileUrl)  => {
-      console.log("La ruta del archivo es: ", fileUrl);
-    });
-  };
+    try {
+      let text = fetch(url);
+      //awaits for text.text() prop 
+      //and then sends it to readText()
+      this.readText( text ); 
+    } catch (error) {
+      console.log(error);
+            
+    }
+  }
 
+  readText(text){
+      console.log(text);
+  }
 
+  readTextFile(file) {
+    // var rawFile = new XMLHttpRequest();
+    // rawFile.open("GET", file, false);
+    // rawFile.onreadystatechange = function () {
+    //   if(rawFile.readyState === 4)  {
+    //     if(rawFile.status === 200 || rawFile.status == 0) {
+    //       var allText = rawFile.responseText;
+    //       console.log(allText);
+    //      }
+    //   }
+    // }
+    // rawFile.send(null);
+    fetch(file)
+      .then((res) => {
+        res.text()
+      })
+      .then((text) => {
+        // do something with "text"
+        console.log("text: ", text);        
+      })
+      .catch((e) => console.error(e));
+  }
 
 }
 

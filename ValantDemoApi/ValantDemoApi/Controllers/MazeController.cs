@@ -51,5 +51,13 @@ namespace ValantDemoApi.Controllers
           return texttool.GetFilesList("librarymaze");
         }
 
+        [HttpGet]
+        [Route(Routes.mazeContent)]
+        public string GetMazeContent(string filename)
+        {
+          var texttool = new textfiletools();
+          return texttool.getTextContet(filename);
+        }
+
   }
 }
