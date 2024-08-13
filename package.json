@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "ng": "nx",
+    "ng": "set NODE_OPTIONS=--openssl-legacy-provider && nx",
     "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2015 browser module main",
     "nx": "nx",
-    "start": "run-p start:client-app start:server-app",
+    "start": "set NODE_OPTIONS=--openssl-legacy-provider && run-p start:client-app start:server-app",
     "build": "npm run build:client-app && npm run build:server-app",
     "build:client-app": "ng build",
     "build:server-app": "cd ValantDemoApi/ValantDemoApi && dotnet build --configuration release",
@@ -48,7 +48,7 @@
     "@nrwl/angular": "12.1.1",
     "cross-env": "^7.0.3",
     "rxjs": "~6.6.3",
-    "start-server-and-test": "^1.12.1",
+    "start-server-and-test": "^1.15.4",
     "tslib": "^2.0.0",
     "zone.js": "^0.10.2"
   },

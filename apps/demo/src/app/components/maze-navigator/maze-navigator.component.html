@@ -1,0 +1,25 @@
+<div>
+  <label for="input-file">Select a Maze file:</label>
+  <input type="file" value="upload" id="input-file" (change)="handleFileChange($event)">
+ </div>
+
+<p>
+  <hr>
+  Maze selector:
+<ul>
+  <li *ngFor="let mazeItem of availableMazes" [ngClass]="{selectCell : mazeItem.isSelected}" 
+  (click)="selectMaze(mazeItem)" >{{mazeItem.name}}</li>
+</ul>
+
+<hr>
+
+
+
+
+
+
+
+
+
+
+Next Moves: <strong>{{moves}}</strong>

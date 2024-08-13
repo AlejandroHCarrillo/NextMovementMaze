@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace ValantDemoApi.Controllers
 {
-    [ApiController]
+  [ApiController]
     [Route("[controller]")]
     public class MazeController : ControllerBase
     {
@@ -16,9 +19,37 @@ namespace ValantDemoApi.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<string> GetNextAvailableMoves()
+        public IEnumerable<string> GetNextAvailableMoves(string mazeid, int row, int col)
         {
           return new List<string> {"Up", "Down", "Left", "Right"};
         }
-    }
+
+        [HttpPost]
+        [Route(Routes.mazeupload)]
+        public async Task<IActionResult> UploadFile(IFormFile file)
+        {
+          if (file == null || file.Length == 0)
+            return Content("file not selected");
+
+          var path = Path.Combine(
+                          Directory.GetCurrentDirectory(), "librarymaze",
+                          file.FileName);
+
+          using (var stream = new FileStream(path, FileMode.Create))
+          {
+            await file.CopyToAsync(stream);
+          }
+
+          return Ok(new { path });
+        }
+
+        [HttpGet]
+        [Route(Routes.mazeList)]
+        public List<string> GetMazefiles()
+        {
+          var texttool = new textfiletools();
+          return texttool.GetFilesList("librarymaze");
+        }
+
+  }
 }
