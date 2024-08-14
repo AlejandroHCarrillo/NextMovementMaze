@@ -9,8 +9,8 @@ import { MazeService } from '../../services/maze.service';
 
 export class MazeNavigatorComponent implements OnInit {
   moves: string[] = [];
-  availableMazes: mazeItem[] = [{name:"Preloaded maze 0", isSelected : true, maze:"SOXXXXXXXX\r\nOOOXXXXXXX\r\nOXOOOXOOOO\r\nXXXXOXOXXO\r\nOOOOOOOXXO\r\nOXXOXXXXXO\r\nOOOOXXXXXE" }, 
-                                {name:"Preloaded maze 1", isSelected : false, maze:"S ████████\r\n   ███████\r\n █   █    \r\n████ █ ██ \r\n       ██ \r\n ██ █████ \r\n    █████E" }];
+  availableMazes: mazeItem[] = [{name:"Preloaded maze000", isSelected : true, maze:"SOXXXXXXXX\r\nOOOXXXXXXX\r\nOXOOOXOOOO\r\nXXXXOXOXXO\r\nOOOOOOOXXO\r\nOXXOXXXXXO\r\nOOOOXXXXXE" }, 
+                                {name:"Preloaded maze001", isSelected : false, maze:"S ████████\r\n   ███████\r\n █   █    \r\n████ █ ██ \r\n       ██ \r\n ██ █████ \r\n    █████E" }];
   selectedMaze: string[][] = [[]];
   titleSelectedMaze: string = "maze001";
 
@@ -20,6 +20,8 @@ export class MazeNavigatorComponent implements OnInit {
   keycode:number;
 
   mazeclicked :boolean = false;
+
+  NextMoves : string[] = ["Not started"];
 
   constructor(private mazeService: MazeService) { }
     
@@ -95,8 +97,6 @@ export class MazeNavigatorComponent implements OnInit {
   }
 
   placeFileContent(file) {
-    console.log("This is the file to place content: ", file);
-    
     this.readFileContent(file).then(content => {
       console.log(content);
       let rowsContent = this.stringToRows(content);
@@ -109,7 +109,7 @@ export class MazeNavigatorComponent implements OnInit {
   }
 
   readFileContent(file) {
-    console.log("This is the read content method: ", file);
+    console.log(file);
     
     const reader = new FileReader()
     return new Promise((resolve, reject) => {
@@ -194,6 +194,70 @@ export class MazeNavigatorComponent implements OnInit {
       .catch((e) => console.error(e));
   }
 
+  kdownhandler(event:any){
+    console.log(event);
+  }
+
+  onKeydown(event) {
+    this.key = event.key;
+    this.keycode = event.code;
+    console.log(event);
+    this.handlePosition(this.key);
+  }
+
+  handlePosition(key: string){
+    let initRow = this.mazePosition.row;
+    let initCol = this.mazePosition.col;
+
+    switch(key){
+      case "ArrowDown": 
+              if(this.mazePosition.row < this.mazeSize.row) this.mazePosition.row += 1; 
+              break;
+      case "ArrowUp": 
+              if(this.mazePosition.row > 0) this.mazePosition.row -= 1; 
+              break;
+      case "ArrowRight": 
+              if(this.mazePosition.col < this.mazeSize.col-1) this.mazePosition.col += 1; 
+              break;
+      case "ArrowLeft": 
+        if(this.mazePosition.col > 0) this.mazePosition.col -= 1; 
+              break;
+      case "Default": break;
+    }
+
+    if (this.selectedMaze[this.mazePosition.row][this.mazePosition.col] == "X" ){
+      console.log("Do not move", initRow, initCol);
+      this.mazePosition.row = initRow;
+      this.mazePosition.col = initCol;
+      return;
+    }
+    if (this.selectedMaze[this.mazePosition.row][this.mazePosition.col] == "O" ){
+      this.selectedMaze[this.mazePosition.row][this.mazePosition.col] = "o";
+    }
+    this.getNextMoves();
+  }
+
+  mazeclickhandler(){
+    this.mazeclicked = true;
+  }
+
+  getNextMoves(){
+    this.NextMoves = [];
+    let currRow = this.mazePosition.row;
+    let currCol = this.mazePosition.col;
+    // check up
+    if  (currRow>1 && this.selectedMaze[currRow-1][currCol] != "X") this.NextMoves.push("up, ");
+    // check down
+    if  (currRow<= this.mazeSize.row && this.selectedMaze[currRow+1][currCol] != "X") this.NextMoves.push("down, ");
+
+    // check left
+    if  (currCol>0 && this.selectedMaze[currRow][currCol-1] != "X") this.NextMoves.push("left, ");
+
+    // check right
+    if  (currCol< this.mazeSize.col && this.selectedMaze[currRow][currCol+1] != "X") this.NextMoves.push("right, ");
+
+    this.NextMoves[this.NextMoves.length-1] = this.NextMoves[this.NextMoves.length-1].replace(",", "");
+  }
 }
 
 interface mazeItem {
