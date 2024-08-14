@@ -15,18 +15,19 @@ export class MazeNavigatorComponent implements OnInit {
   titleSelectedMaze: string = "maze001";
 
   mazePosition: mazePosition = {row:1, col:0 };
-  mazeSize: mazePosition = {row:1, col:1 };
-  key:string = "no key presed";
+  mazeSize: mazePosition = {row:0, col:0 };
+  key:string = "";
   keycode:number;
 
   mazeclicked :boolean = false;
 
-  NextMoves : string[] = ["Not started"];
+  arrNextMoves : string[] = [];
+
+  nextMovs :string = "";
 
   constructor(private mazeService: MazeService) { }
     
   ngOnInit(): void {
-    // this.loadText('file:///C:/repos/maze-demo/apps/demo/src/assets/mazelibrary/maze001.txt');
 
     console.log("cargar movimientos: ");
     
@@ -50,20 +51,6 @@ export class MazeNavigatorComponent implements OnInit {
     .catch((e)=>{
         console.log("error: ", e);            
     });
-
-
-    // let sMaze = this.mazeService.loadtxtFileMock(this.titleSelectedMaze);
-    // // console.log(sMaze);
-    // this.mazeSize.row= sMaze.length;      
-    // this.mazeSize.col = this.mazeSize.row;      
-
-    // sMaze.forEach(row => {
-    //   console.log(row);
-    //   let rowArray = this.stringToArray(row);
-    //   this.selectedMaze.push(rowArray);
-    //   this.mazeSize.col = rowArray.length;      
-
-    // });
   }
 
   handleFileChange(e:any){
@@ -104,6 +91,8 @@ export class MazeNavigatorComponent implements OnInit {
       this.mazeSize.col=this.mazeSize.row;      
       this.selectedMaze = this.arrRowsToMatrix(rowsContent);
       this.titleSelectedMaze = file.name;
+      this.mazePosition = {row:1, col:0 };
+      this.mazeclicked = false;
       this.availableMazes.push({name:file.name, isSelected:true, maze: content + "" });
     }).catch(error => console.log(error))
   }
@@ -121,6 +110,7 @@ export class MazeNavigatorComponent implements OnInit {
 
   stringToRows(strMaze : any){
     let arrRows = strMaze.split("\n");
+    this.mazeSize.row = arrRows.length;
     return arrRows
   }
 
@@ -145,7 +135,7 @@ export class MazeNavigatorComponent implements OnInit {
     if (mazeItem.maze == "" || mazeItem.maze == null ) {
       let tempMaze = this.mazeService.getMazeContent(mazeItem.name);
       tempMaze.then(r => {
-        console.log(r)
+        console.log("aqui: ", r)
       } );
     }
     this.selectedMaze = this.arrRowsToMatrix(this.stringToRows(mazeItem.maze));
@@ -158,8 +148,6 @@ export class MazeNavigatorComponent implements OnInit {
     
     try {
       let text = fetch(url);
-      //awaits for text.text() prop 
-      //and then sends it to readText()
       this.readText( text ); 
     } catch (error) {
       console.log(error);
@@ -172,17 +160,6 @@ export class MazeNavigatorComponent implements OnInit {
   }
 
   readTextFile(file) {
-    // var rawFile = new XMLHttpRequest();
-    // rawFile.open("GET", file, false);
-    // rawFile.onreadystatechange = function () {
-    //   if(rawFile.readyState === 4)  {
-    //     if(rawFile.status === 200 || rawFile.status == 0) {
-    //       var allText = rawFile.responseText;
-    //       console.log(allText);
-    //      }
-    //   }
-    // }
-    // rawFile.send(null);
     fetch(file)
       .then((res) => {
         res.text()
@@ -214,7 +191,7 @@ export class MazeNavigatorComponent implements OnInit {
               if(this.mazePosition.row < this.mazeSize.row) this.mazePosition.row += 1; 
               break;
       case "ArrowUp": 
-              if(this.mazePosition.row > 0) this.mazePosition.row -= 1; 
+              if(this.mazePosition.row > 1) this.mazePosition.row -= 1; 
               break;
       case "ArrowRight": 
               if(this.mazePosition.col < this.mazeSize.col-1) this.mazePosition.col += 1; 
@@ -242,21 +219,23 @@ export class MazeNavigatorComponent implements OnInit {
   }
 
   getNextMoves(){
-    this.NextMoves = [];
+    this.arrNextMoves = [];
     let currRow = this.mazePosition.row;
     let currCol = this.mazePosition.col;
     // check up
-    if  (currRow>1 && this.selectedMaze[currRow-1][currCol] != "X") this.NextMoves.push("up, ");
+    if  (currRow>1 && this.selectedMaze[currRow-1][currCol] != "X") this.arrNextMoves.push("up");
     // check down
-    if  (currRow<= this.mazeSize.row && this.selectedMaze[currRow+1][currCol] != "X") this.NextMoves.push("down, ");
+    if  (currRow<=this.mazeSize.row-1 && this.selectedMaze[currRow+1][currCol] != "X") this.arrNextMoves.push("down");
 
     // check left
-    if  (currCol>0 && this.selectedMaze[currRow][currCol-1] != "X") this.NextMoves.push("left, ");
+    if  (currCol>0 && this.selectedMaze[currRow][currCol-1] != "X") this.arrNextMoves.push("left");
 
     // check right
-    if  (currCol< this.mazeSize.col && this.selectedMaze[currRow][currCol+1] != "X") this.NextMoves.push("right, ");
+    if  (currCol< this.mazeSize.col-1 && this.selectedMaze[currRow][currCol+1] != "X") this.arrNextMoves.push("right");
 
-    this.NextMoves[this.NextMoves.length-1] = this.NextMoves[this.NextMoves.length-1].replace(",", "");
+    this.nextMovs = this.arrNextMoves.join(", ");
+    // this.arrNextMoves[this.arrNextMoves.length-1] = this.arrNextMoves[this.arrNextMoves.length-1].replace(",", "");
+
   }
 }
 
