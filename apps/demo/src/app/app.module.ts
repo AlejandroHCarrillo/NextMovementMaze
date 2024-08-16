@@ -6,13 +6,14 @@ import { LoggingService } from './logging/logging.service';
 import { StuffService } from './stuff/stuff.service';
 import { environment } from '../environments/environment';
 import { ValantDemoApiClient } from './api-client/api-client';
+import { MazeNavigatorComponent } from './components/maze-navigator/maze-navigator.component';
 
 export function getBaseUrl(): string {
   return environment.baseUrl;
 }
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, MazeNavigatorComponent],
   imports: [BrowserModule, HttpClientModule],
   providers: [
     LoggingService,
