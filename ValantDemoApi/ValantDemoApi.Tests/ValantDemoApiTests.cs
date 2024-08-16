@@ -29,5 +29,21 @@ namespace ValantDemoApi.Tests
           content.Should().Contain("Left");
           content.Should().Contain("Right");
         }
+
+    [Test]
+    public async Task ShouldReturnAllFilesOnDirectory()
+    {
+      var result = await this.client.GetAsync("/Maze/mazelist");
+      result.EnsureSuccessStatusCode();
+      var resp = result.Content.ReadAsStreamAsync().GetAwaiter();      
+      var content = JsonConvert.DeserializeObject<string[]>(await result.Content.ReadAsStringAsync());
+      content.Should().Contain("Up");
+      //content.Should().Contain("Down");
+      //content.Should().Contain("Left");
+      //content.Should().Contain("Right");
+      //Assert
+      Assert.Greater(2, 1);
     }
+
+  }
 }

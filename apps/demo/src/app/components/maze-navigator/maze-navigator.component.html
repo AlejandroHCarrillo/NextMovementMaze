@@ -1,0 +1,80 @@
+Moves: <strong>{{moves}}</strong>
+<p>
+  <hr>
+
+  Maze selector:
+<ul>
+  <li *ngFor="let mazeItem of availableMazes" [ngClass]="{selectCell : mazeItem.isSelected}" 
+  (click)="selectMaze(mazeItem)" >{{mazeItem.name}}</li>
+</ul>
+
+<hr>
+
+<div>
+  <label for="input-file">Select a Maze file:</label><br>
+  <input type="file" id="input-file" (change)="handleFileChange($event)">
+ </div>
+ 
+<hr>
+{{titleSelectedMaze}} Maze:
+<hr/>
+<div>
+  Current position: ({{mazePosition.row}},{{mazePosition.col}}) 
+  &nbsp; 
+  Maze size: ({{mazeSize.row}},{{mazeSize.col}}) 
+  &nbsp; 
+  Available moves: <strong>{{nextMovs}}</strong>
+  &nbsp;
+  key pressed: {{key}}
+  &nbsp;      
+</div>
+<!-- <div class="sucess" *ngIf="selectedMaze[mazePosition.row][mazePosition.col] == 'E'">
+  Sucess!!!
+</div> -->
+<hr>
+<div style="display: flex; flex-direction: row;">
+  <div *ngIf="selectedMaze!=[]">
+    <table *ngIf="selectedMaze" 
+    (click)="mazeclickhandler()"
+    (keydown)="onKeydown($event)"
+    tabindex="1"
+    [ngClass]="{mazeclicked : mazeclicked==true}"
+    >
+    <tr *ngFor="let row of selectedMaze ">
+      <td *ngFor="let cel of row" [ngClass]="{selectCell : cel == 'S' || cel == 'E', currentCell : cel == 'o'}" >{{cel}}</td>
+    </tr>
+  </table>
+  <div *ngIf="selectedMaze" style="font-size: .75rem;">(Click over the maze to start) </div>
+  </div>
+  
+  <div *ngIf="selectedMaze" style="background-color: whitesmoke; width: 300px;">
+    <table>
+      <tr>
+        <td></td>
+        <td [ngClass]="{boldMov: nextMovs.includes('up')}">up</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td [ngClass]="{boldMov: nextMovs.includes('left')}">left</td>
+        <td> 
+          <div *ngIf="selectedMaze">{{ selectedMaze[mazePosition.row][mazePosition.col] }} </div>
+        </td>
+        <td [ngClass]="{boldMov: nextMovs.includes('right')}">right</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td  [ngClass]="{boldMov: nextMovs.includes('down')}">down</td>
+        <td></td>
+      </tr>
+    </table>
+  </div>
+</div>
+  
+<br>
+<div *ngIf="selectedMaze!=undefined" > 
+  <div class="sucess" *ngIf="selectedMaze[mazePosition.row][mazePosition.col] == 'E'">
+    Sucess!!!
+  </div>
+</div>
+<br>
+  <br><br>
