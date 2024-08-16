@@ -45,7 +45,7 @@ namespace ValantDemoApi.Controllers
 
         [HttpGet]
         [Route(Routes.mazeList)]
-        public List<string> GetMazefiles()
+        public IEnumerable<string> GetMazefiles()
         {
           var texttool = new textfiletools();
           return texttool.GetFilesList("librarymaze");
